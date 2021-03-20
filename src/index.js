@@ -1,25 +1,25 @@
 require("dotenv").config();
+const passport = require("passport");
+const express = require("express");
+const mongoose = require("mongoose");
 
-const express = require("express"),
-  users = require("Routes/users.route");
+// Setting up port
+const mongoConnUri = process.env.MONGO_CONN_URL;
+let PORT = process.env.PORT || 3000;
 
 const app = express();
 
 app.use(express.json());
+// for parsing application/xwww-
+// TODO: research
+// app.use(express.urlencoded({ extended: false }));
 
-app.listen(3000, () => {
+app.listen(PORT, () => {
   console.log("Listening on port 3000");
 });
 
-app.use("/users", users);
-
-// process.env
-// mongodb+srv://ugradAdmin:<password>@clusterzero.uknv9.mongodb.net/myFirstDatabase?retryWrites=true&w=majority
-
-const mongoose = require("mongoose");
-
-const uri = `mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGODB_PASSWORD}@clusterzero.uknv9.mongodb.net/ugrad?retryWrites=true&w=majority`;
-mongoose.connect(uri, {
+// Set up Database
+mongoose.connect(mongoConnUri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useCreateIndex: true,
@@ -27,17 +27,19 @@ mongoose.connect(uri, {
 
 const db = mongoose.connection;
 
-console.log(uri);
-//Bind connection to error event (to get notification of connection errors)
-db.on("error", () => {
-  console.log("MongoDB connection error:");
-});
-db.on("open", () => {
+db.once("open", () => {
   console.log("MongoDB connection success:");
 });
 
-// client.connect((err) => {
-//   const collection = client.db("test").collection("devices");
-//   // perform actions on the collection object
-//   client.close();
-// });
+//Bind connection to error event (to get notification of connection errors)
+db.on("error", () => {
+  console.log("MongoDB connection error:");
+  process.exit();
+});
+
+// Initialize PASSPORT middleware
+app.use(passport.initialize());
+require("Middlewares/jwt.middleware")(passport);
+
+// Configure Route
+require("./routes/index")(app);
