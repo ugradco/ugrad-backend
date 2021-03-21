@@ -26,9 +26,6 @@ userSchema.methods.generateJWT = function () {
   let payload = {
     id: this._id,
     email: this.email,
-    username: this.username,
-    firstName: this.firstName,
-    lastName: this.lastName,
   };
 
   return jwt.sign(payload, process.env.JWT_SECRET, {
@@ -36,17 +33,17 @@ userSchema.methods.generateJWT = function () {
   });
 };
 
-// Email token
+// Email verification Token
 userSchema.methods.generateVerificationToken = function () {
   console.log("userId", this._id, this);
 
-  const characters =
-    "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  // Only use uppercase characters
+  // exclude abcdefghijklmnopqrstuvwxyz
+  const characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   let token = "";
   for (let i = 0; i < 6; i++) {
     token += characters[Math.floor(Math.random() * characters.length)];
   }
-  console.log("token", token);
 
   let payload = {
     userId: this._id,

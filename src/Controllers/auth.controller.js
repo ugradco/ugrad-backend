@@ -167,9 +167,16 @@ exports.resendToken = async (req, res) => {
 async function sendVerificationEmail(user, req, res) {
   try {
     console.log("sendVerificationEmail", user);
-    const token = user.generateVerificationToken();
-    // Save the verification token
-    await token.save();
+
+    // Check if the user has unexpired token
+    let token = await Token.findOne({ userId: user._id });
+
+    if (!token) {
+      token = user.generateVerificationToken();
+      // Save the verification token
+      await token.save();
+    }
+
     console.log("token", token);
 
     const subject = "Account Verification Token";

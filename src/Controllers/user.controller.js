@@ -1,5 +1,5 @@
-const User = require("../models/user");
-const { uploader, sendEmail } = require("../utils/index");
+const User = require("Models/user.model");
+// const {  sendEmail } = require("../utils/index");
 
 // @route GET admin/user
 // @desc Returns all users
@@ -49,7 +49,7 @@ exports.store = async (req, res) => {
     let html = `<p>Hi ${user.username}<p><br><p>A new account has been created for you on ${domain}. Please click on the following <a href="${link}">link</a> to set your password and login.</p> 
                   <br><p>If you did not request this, please ignore this email.</p>`;
 
-    await sendEmail({ to, from, subject, html });
+    // await sendEmail({ to, from, subject, html });
 
     res
       .status(200)
@@ -65,6 +65,7 @@ exports.store = async (req, res) => {
 exports.show = async function (req, res) {
   try {
     const id = req.params.id;
+    console.log(req.user, id);
 
     const user = await User.findById(id);
 
@@ -101,8 +102,6 @@ exports.update = async function (req, res) {
     if (!req.file)
       return res.status(200).json({ user, message: "User has been updated" });
 
-    //Attempt to upload to cloudinary
-    const result = await uploader(req);
     const user_ = await User.findByIdAndUpdate(
       id,
       { $set: update },

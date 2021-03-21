@@ -3,10 +3,9 @@ var express = require("express");
 var router = express.Router();
 
 const User = require("Models/user.model");
+const UserController = require("Controllers/user.controller");
 
-router.get("/", function (req, res) {
-  res.send("GET handler for /users route.");
-});
+router.get("/", UserController.show);
 
 router.post("/", function (req, res) {
   const { email } = req.body;
