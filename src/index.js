@@ -42,4 +42,4 @@ app.use(passport.initialize());
 require("Middlewares/jwt.middleware")(passport);
 
 // Configure Route
-require("./routes/index")(app);
+require("Routes/index")(app);
