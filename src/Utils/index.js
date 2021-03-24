@@ -1,5 +1,4 @@
 const nodemailer = require("nodemailer");
-var sesTransport = require("nodemailer-ses-transport");
 
 const user = process.env.AWS_SMTP_USER;
 const pass = process.env.AWS_SMTP_USER_PASS;
