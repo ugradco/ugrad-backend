@@ -1,6 +1,6 @@
 const User = require("Models/user.model");
 const Token = require("Models/token.model");
-// const {sendEmail} = require('../utils/index');
+const { sendEmail } = require("Utils/index");
 
 // @route POST api/user/register
 // @desc Register user
@@ -179,16 +179,17 @@ async function sendVerificationEmail(user, req, res) {
 
     console.log("token", token);
 
-    const subject = "Account Verification Token";
+    const subject = "Ugrad Verification Code: " + token.token;
     const to = user.email;
-    const from = process.env.FROM_EMAIL;
     const link =
       "http://" + req.headers.host + "/api/auth/verify/" + token.token;
-    const html = `<p>Hi ${user.username}<p><br><p>Please click on the following <a href="${link}">link</a> to verify your account.</p> 
+    const html = `<p>Hi ${user.username || "Stranger"}<p><br>
+                  <p>Please use following code to verify your account: 
+                  ${token.token}</p> 
                   <br><p>If you did not request this, please ignore this email.</p>`;
 
-    // await sendEmail({to, from, subject, html});
-    console.log(token.token);
+    console.log("send email");
+    sendEmail({ to, subject, html });
 
     res.status(200).send({
       message: "A verification email has been sent to " + user.email + ".",
