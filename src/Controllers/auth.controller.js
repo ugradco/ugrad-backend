@@ -6,6 +6,7 @@ const { sendEmail } = require("Utils/index");
 // @desc Register user
 // @access Public
 exports.register = async (req, res) => {
+  res.header("Access-Control-Allow-Origin", "*");
   try {
     const { email } = req.body;
 

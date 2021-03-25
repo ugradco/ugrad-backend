@@ -2,6 +2,7 @@ require("dotenv").config();
 const passport = require("passport");
 const express = require("express");
 const mongoose = require("mongoose");
+const cors = require("cors");
 
 // Setting up port
 const mongoConnUri = process.env.MONGO_CONN_URL;
@@ -9,6 +10,7 @@ let PORT = process.env.PORT || 3000;
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 // for parsing application/xwww-
 // TODO: research
