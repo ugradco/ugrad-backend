@@ -6,7 +6,7 @@ const cors = require("cors");
 
 // Setting up port
 const mongoConnUri = process.env.MONGO_CONN_URL;
-let PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
 const app = express();
 
@@ -17,7 +17,7 @@ app.use(express.json());
 // app.use(express.urlencoded({ extended: false }));
 
 app.listen(PORT, () => {
-  console.log("Listening on port 3000");
+  console.log("Listening on port", PORT);
 });
 
 // Set up Database

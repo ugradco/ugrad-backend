@@ -4,11 +4,19 @@ const Schema = mongoose.Schema;
 const postSchema = new Schema({
   text: String,
   visibility: Boolean,
-  id: Number,
-  user_id: Number,
+  user: {
+    id: ObjectId,
+    alias: String,
+    short_bio: String
+  },
   feedback: Array,
-  comment_count: Number,
-  comments: Array,
+  comments: [{
+      user: {
+        id: ObjectId,
+        alias: String
+      },
+      message: String,
+  }],
   tags: Array,
   images: Array,
   keywords: Array,
