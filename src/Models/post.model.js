@@ -3,25 +3,26 @@ const Schema = mongoose.Schema;
 
 const postSchema = new Schema({
   text: String,
-  visibility: Boolean,
+  visibility: {type: Boolean, default: true},
   user: {
     id: ObjectId,
     alias: String,
-    short_bio: String
+    short_bio: String,
   },
-  feedback: Array,
+  feedback: Array, // TODO: decide how to store this
   comments: [{
       user: {
         id: ObjectId,
-        alias: String
+        alias: String,
       },
       message: String,
   }],
   tags: Array,
   images: Array,
   keywords: Array,
-  publish_date: Date,
-  last_activity_date: Date
-});
+}, {timestamps: {
+  createdAt: "created_at",
+  updatedAt: "updated_at",
+}});
 
 module.exports = mongoose.model('Post', postSchema);

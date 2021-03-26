@@ -1,6 +1,6 @@
-var express = require("express");
+const express = require("express");
 
-var router = express.Router();
+const router = express.Router();
 
 const User = require("Models/user.model");
 const UserController = require("Controllers/user.controller");
@@ -8,6 +8,7 @@ const UserController = require("Controllers/user.controller");
 router.get("/", UserController.show);
 
 router.post("/", function (req, res) {
+  // TODO: take this into user using create func
   const { email } = req.body;
 
   const user = new User({ email, name: "ghost" });

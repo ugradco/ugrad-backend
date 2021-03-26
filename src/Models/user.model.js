@@ -10,6 +10,7 @@ const userSchema = new Schema({
   name: String,
   email: { type: String, unique: true, index: true, required: true },
   alias: String,
+  short_bio: String,
   followed_topics: Array,
   banned_until: Date,
   restricted_until: Date,
