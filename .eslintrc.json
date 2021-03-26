@@ -1,0 +1,42 @@
+{
+  "env": {
+    "node": true,
+    "commonjs": true,
+    "es6": true,
+    "browser": true
+  },
+  "parser": "babel-eslint",
+  "extends": ["prettier", "airbnb-base"],
+  "parserOptions": {
+    "ecmaVersion": 2018
+  },
+  "plugins": ["prettier"],
+  "globals": {
+    "process": "readonly",
+    "Atomics": "readonly",
+    "SharedArrayBuffer": "readonly"
+  },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "paths": ["src"]
+      }
+    }
+  },
+  "rules": {
+    // 0 = off, 1 = warn, 2 = error
+    "prettier/prettier": ["error"],
+    "quotes": [2, "double"],
+    "max-len": [
+      2,
+      {
+        "code": 140
+      }
+    ],
+    "no-underscore-dangle": [0],
+    "no-shadow": [0],
+    "no-use-before-define": [0],
+    "no-else-return": ["error", { "allowElseIf": true }],
+    "object-curly-newline": [0]
+  }
+}

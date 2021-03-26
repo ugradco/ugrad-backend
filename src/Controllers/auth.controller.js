@@ -14,15 +14,15 @@ exports.register = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (user) {
-      return sendVerificationEmail(user, req, res);
-      // return res.status(401).json({
-      //   message:
-      //     "The email address you have entered is already associated with another account.",
-      // });
+      // return sendVerificationEmail(user, req, res);
     }
 
+    // alias: Anonymous#23
     // TODO: Check body injection
-    const newUser = new User({ ...req.body });
+    const userCount = await User.count();
+    console.log("userCount", userCount);
+    const alias = `Anonymous#${12345 + userCount}`;
+    const newUser = new User({ email, alias });
 
     const user_ = await newUser.save();
 
@@ -68,21 +68,14 @@ exports.login = async (req, res) => {
 
     if (!token)
       return res.status(400).json({
-        message:
-          "We were unable to find a valid token. Your token may have expired.",
+        message: "We were unable to find a valid token. Your token may have expired.",
       });
 
     // If we found a token, find a matching user
     User.findOne({ _id: token.userId }, (err, user) => {
-      if (!user)
-        return res
-          .status(400)
-          .json({ message: "We were unable to find a user for this token." });
+      if (!user) return res.status(400).json({ message: "We were unable to find a user for this token." });
 
-      if (user.email !== email)
-        return res
-          .status(400)
-          .json({ message: "User and token doesn't match :(" });
+      if (user.email !== email) return res.status(400).json({ message: "User and token doesn't match :(" });
     });
 
     // Login successful, write token, and send back user
@@ -97,10 +90,7 @@ exports.login = async (req, res) => {
 // @desc Verify token
 // @access Public
 exports.verify = async (req, res) => {
-  if (!req.params.token)
-    return res
-      .status(400)
-      .json({ message: "We were unable to find a user for this token." });
+  if (!req.params.token) return res.status(400).json({ message: "We were unable to find a user for this token." });
 
   try {
     // Find a matching token
@@ -108,21 +98,14 @@ exports.verify = async (req, res) => {
 
     if (!token)
       return res.status(400).json({
-        message:
-          "We were unable to find a valid token. Your token my have expired.",
+        message: "We were unable to find a valid token. Your token my have expired.",
       });
 
     // If we found a token, find a matching user
     User.findOne({ _id: token.userId }, (err, user) => {
-      if (!user)
-        return res
-          .status(400)
-          .json({ message: "We were unable to find a user for this token." });
+      if (!user) return res.status(400).json({ message: "We were unable to find a user for this token." });
 
-      if (user.isVerified)
-        return res
-          .status(400)
-          .json({ message: "This user has already been verified." });
+      if (user.isVerified) return res.status(400).json({ message: "This user has already been verified." });
 
       // Verify and save the user
       user.isVerified = true;
@@ -182,8 +165,7 @@ async function sendVerificationEmail(user, req, res) {
 
     const subject = "Ugrad Verification Code: " + token.token;
     const to = user.email;
-    const link =
-      "http://" + req.headers.host + "/api/auth/verify/" + token.token;
+    const link = "http://" + req.headers.host + "/api/auth/verify/" + token.token;
     const html = `<p>Hi ${user.username || "Stranger"}<p><br>
                   <p>Please use following code to verify your account: 
                   ${token.token}</p> 
