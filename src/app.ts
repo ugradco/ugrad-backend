@@ -1,11 +1,24 @@
-require("dotenv").config();
-const passport = require("passport");
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
+import express from "express";
+import passport from "passport";
+import dotenv from "dotenv";
+import mongoose from "mongoose";
+import cors from "cors";
+import JWTMiddleware from "Middlewares/jwt.middleware";
+
+declare var process: {
+  env: {
+    NODE_ENV: string;
+    MONGO_CONN_URL: string;
+    PORT: string;
+  };
+  exit: any;
+};
+
+dotenv.config();
+console.log("process.env.MONGO_CONN_URL");
 
 // Setting up port
-const mongoConnUri = process.env.MONGO_CONN_URL;
+const mongoConnUri = process.env.MONGO_CONN_URL || "";
 const PORT = process.env.PORT || 3000;
 
 const app = express();
@@ -33,7 +46,7 @@ db.once("open", () => {
   console.log("MongoDB connection success:");
 });
 
-//Bind connection to error event (to get notification of connection errors)
+// Bind connection to error event (to get notification of connection errors)
 db.on("error", () => {
   console.log("MongoDB connection error:");
   process.exit();
@@ -41,7 +54,7 @@ db.on("error", () => {
 
 // Initialize PASSPORT middleware
 app.use(passport.initialize());
-require("Middlewares/jwt.middleware")(passport);
+JWTMiddleware(passport);
 
 // Configure Route
 require("Routes/index")(app);
