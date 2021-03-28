@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
-const crypto = require("crypto");
+
+const { Schema } = mongoose;
+
 const jwt = require("jsonwebtoken");
-const Schema = mongoose.Schema;
 
 const Token = require("./token.model");
 
@@ -9,8 +10,9 @@ const userSchema = new Schema({
   id: Number,
   name: String,
   email: { type: String, unique: true, index: true, required: true },
-  alias: String,
-  followed_topics: Array,
+  alias: { type: String, unique: true, required: true },
+  short_bio: String,
+  followed_topics: [],
   banned_until: Date,
   restricted_until: Date,
   profile_image: String,
@@ -18,12 +20,12 @@ const userSchema = new Schema({
 });
 
 // Bearer Token
-userSchema.methods.generateJWT = function () {
+userSchema.methods.generateJWT = () => {
   const today = new Date();
   const expirationDate = new Date(today);
   expirationDate.setDate(today.getDate() + 60);
 
-  let payload = {
+  const payload = {
     id: this._id,
     email: this.email,
   };
@@ -34,20 +36,20 @@ userSchema.methods.generateJWT = function () {
 };
 
 // Email verification Token
-userSchema.methods.generateVerificationToken = function () {
+userSchema.methods.generateVerificationToken = () => {
   console.log("userId", this._id, this);
 
   // Only use uppercase characters
   // exclude abcdefghijklmnopqrstuvwxyz
   const characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   let token = "";
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 6; i = +1) {
     token += characters[Math.floor(Math.random() * characters.length)];
   }
 
-  let payload = {
+  const payload = {
     userId: this._id,
-    token: token,
+    token,
   };
 
   return new Token(payload);

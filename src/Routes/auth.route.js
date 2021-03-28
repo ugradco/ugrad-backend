@@ -9,14 +9,14 @@ const router = express.Router();
 
 router.get("/", (req, res) => {
   res.status(200).json({
-    message:
-      "You are in the Auth Endpoint. Register or Login to test Authentication.",
+    message: "You are in the Auth Endpoint. Register or Login to test Authentication.",
   });
 });
 
 router.post(
   "/register",
   [
+    // TODO ADD ku mail check
     check("email").isEmail().withMessage("Enter a valid email address"),
     // check("password")
     //   .not()
@@ -30,20 +30,17 @@ router.post(
     // check("lastName").not().isEmpty().withMessage("You last name is required"),
   ],
   validate,
-  Auth.register
+  Auth.register,
 );
 
 router.post(
   "/login",
-  [
-    check("email").isEmail().withMessage("Enter a valid email address"),
-    check("token").not().isEmpty(),
-  ],
+  [check("email").isEmail().withMessage("Enter a valid email address"), check("token").not().isEmpty()],
   validate,
-  Auth.login
+  Auth.login,
 );
 
-//EMAIL Verification
+// EMAIL Verification
 // router.get("/verify/:token", Auth.verify);
 // router.post("/resend", Auth.resendToken);
 

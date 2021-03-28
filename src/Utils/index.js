@@ -16,10 +16,7 @@ const transport = nodemailer.createTransport({
 });
 
 function sendEmail(mailOptions) {
-  console.log("fe", defaultEmail);
-  return transport
-    .sendMail({ from: defaultEmail, ...mailOptions })
-    .catch((err) => console.log(err));
+  return transport.sendMail({ from: defaultEmail, ...mailOptions }).catch((err) => console.log(err));
 }
 
 module.exports = { sendEmail };
