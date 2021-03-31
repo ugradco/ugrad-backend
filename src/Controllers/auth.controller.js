@@ -14,7 +14,7 @@ exports.register = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (user) {
-      // return sendVerificationEmail(user, req, res);
+      return sendVerificationEmail(user, req, res);
     }
 
     // alias: Anonymous#23
@@ -26,9 +26,9 @@ exports.register = async (req, res) => {
 
     const user_ = await newUser.save();
 
-    await sendVerificationEmail(user_, req, res);
+    return sendVerificationEmail(user_, req, res);
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -41,13 +41,14 @@ exports.login = async (req, res) => {
 
     const user = await User.findOne({ email });
 
-    if (!user)
+    if (!user) {
       return res.status(401).json({
         msg:
           "The email address " +
           email +
           " is not associated with any account. Double-check your email address and try again.",
       });
+    }
 
     // Validate password
     // TODO
@@ -66,10 +67,11 @@ exports.login = async (req, res) => {
 
     const token = await Token.findOne({ token: req.body.token });
 
-    if (!token)
+    if (!token) {
       return res.status(400).json({
         message: "We were unable to find a valid token. Your token may have expired.",
       });
+    }
 
     // If we found a token, find a matching user
     User.findOne({ _id: token.userId }, (err, user) => {
@@ -79,9 +81,9 @@ exports.login = async (req, res) => {
     });
 
     // Login successful, write token, and send back user
-    res.status(200).json({ token: user.generateJWT(), user: user });
+    return res.status(200).json({ token: user.generateJWT(), user });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
 
@@ -129,18 +131,20 @@ exports.resendToken = async (req, res) => {
 
     const user = await User.findOne({ email });
 
-    if (!user)
+    if (!user) {
       return res.status(401).json({
         message:
           "The email address " +
           req.body.email +
           " is not associated with any account. Double-check your email address and try again.",
       });
+    }
 
-    if (user.isVerified)
+    if (user.isVerified) {
       return res.status(400).json({
         message: "This account has already been verified. Please log in.",
       });
+    }
 
     await sendVerificationEmail(user, req, res);
   } catch (error) {
@@ -158,10 +162,11 @@ async function sendVerificationEmail(user, req, res) {
     if (!token) {
       token = user.generateVerificationToken();
       // Save the verification token
+      console.log("token:", token);
       await token.save();
     }
 
-    console.log("token", token);
+    console.log("token saved");
 
     const subject = "Ugrad Verification Code: " + token.token;
     const to = user.email;

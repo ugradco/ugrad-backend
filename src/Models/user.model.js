@@ -9,6 +9,7 @@ const Token = require("./token.model");
 const userSchema = new Schema({
   id: Number,
   name: String,
+  admin: Boolean,
   email: { type: String, unique: true, index: true, required: true },
   alias: { type: String, unique: true, required: true },
   short_bio: String,
@@ -20,7 +21,7 @@ const userSchema = new Schema({
 });
 
 // Bearer Token
-userSchema.methods.generateJWT = () => {
+userSchema.methods.generateJWT = function generateJWT() {
   const today = new Date();
   const expirationDate = new Date(today);
   expirationDate.setDate(today.getDate() + 60);
@@ -36,17 +37,16 @@ userSchema.methods.generateJWT = () => {
 };
 
 // Email verification Token
-userSchema.methods.generateVerificationToken = () => {
-  console.log("userId", this._id, this);
-
+userSchema.methods.generateVerificationToken = function generateVerificationToken() {
   // Only use uppercase characters
   // exclude abcdefghijklmnopqrstuvwxyz
   const characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   let token = "";
-  for (let i = 0; i < 6; i = +1) {
+  for (let i = 0; i < 6; i += 1) {
     token += characters[Math.floor(Math.random() * characters.length)];
   }
 
+  console.log("userId", this._id, this, token);
   const payload = {
     userId: this._id,
     token,

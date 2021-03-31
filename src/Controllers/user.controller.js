@@ -1,19 +1,37 @@
+const _ = require("lodash");
+
 const User = require("Models/user.model");
 // const {  sendEmail } = require("../utils/index");
+
+// @route GET api/user/me
+// @desc Returns a specific user
+// @access Public
+exports.me = async (req, res) => {
+  try {
+    console.log(req.user);
+
+    const user = await User.findOne({ email: req.user.email });
+    console.log(user);
+
+    return res.status(200).json(_.pick(req.user, ["_id", "email", "alias", "short_bio", "profile_image"]));
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
 
 // @route GET admin/user
 // @desc Returns all users
 // @access Public
-exports.index = async function (req, res) {
+exports.index = async (req, res) => {
   const users = await User.find({});
   res.status(200).json({ users });
 };
 
-exports.create = async function (req, res) {
+exports.create = async (req, res) => {
   // TODO: take this into user using create func
-  const { email } = req.body;
+  const { email, name } = req.body;
 
-  const user = new User({ email, name: "ghost" });
+  const user = new User({ email, name });
   user.save(
     (err) => {
       console.log("Failed", err);
@@ -79,11 +97,11 @@ exports.show = async (req, res) => {
 
     const user = await User.findById(id);
 
-    if (!user) return res.status(401).json({ message: "User does not exist" });
+    if (!user) return res.status(404).json({ message: "User does not exist" });
 
-    res.status(200).json({ user });
+    return res.status(200).json({ user });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
 
@@ -95,22 +113,24 @@ exports.update = async (req, res) => {
     const { id } = req.params;
     const update = req.body;
     const userId = req.user._id;
+    console.log("id", id, userId);
 
     // Make sure the passed id is that of the logged in user
-    if (userId.toString() !== id.toString()) {
+    if ((userId.toString() !== id.toString() && !req.user.admin) || (update.admin && !req.user.admin)) {
       return res.status(401).json({
-        message: "Sorry, you don't have the permission to upd this data.",
+        message: "Sorry, you don't have the permission to update this data.",
       });
     }
 
+    // ToDo check body
     const user = await User.findByIdAndUpdate(id, { $set: update }, { new: true });
 
     // if there is no image, return success message
     if (!req.file) return res.status(200).json({ user, message: "User has been updated" });
 
-    const user_ = await User.findByIdAndUpdate(id, { $set: update }, { new: true });
+    // const user_ = await User.findByIdAndUpdate(id, { $set: update }, { new: true });
 
-    return res.status(200).json({ user: user_, message: "User has been updated" });
+    return res.status(200).json({ user, message: "User has been updated" });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }

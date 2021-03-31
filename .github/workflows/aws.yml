@@ -12,24 +12,19 @@ jobs:
     environment: production
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v1
+      - name: Checkout
+        uses: actions/checkout@v1
 
-    - name: Generate deployment package
-      run: zip -r deploy.zip . -x '*.git*'
+      - name: Generate deployment package
+        run: zip -r deploy.zip . -x '*.git*'
 
-    - name: Deploy to EB
-      uses: einaregilsson/beanstalk-deploy@v16
-      with:
-        aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        application_name: ugrad-backend
-        environment_name: Ugradbackend-env
-        version_label: 12345
-        region: eu-central-1
-        deployment_package: deploy.zip
-
-
-        service: sample-app-service
-        cluster: default
-        wait-for-service-stability: true
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v16
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: ugrad-backend
+          environment_name: Ugradbackend-env
+          version_label: github-build-$(date +%s)-${{ github.head_ref }}
+          region: eu-central-1
+          deployment_package: deploy.zip
