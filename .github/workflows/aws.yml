@@ -25,6 +25,6 @@ jobs:
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           application_name: ugrad-backend
           environment_name: Ugradbackend-env
-          version_label: github-build-$(date +%s)-${{ github.head_ref }}
+          version_label: github-build-${{ (date +%s) }}-${{ github.head_ref }}
           region: eu-central-1
           deployment_package: deploy.zip
