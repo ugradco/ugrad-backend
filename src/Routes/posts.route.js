@@ -10,7 +10,7 @@ router.post("/", PostController.create);
 router.get("/feed", PostController.feed);
 router.post(
   "/comment",
-  [check("postId").not().isEmpty().withMessage("Post Id is required")],
+  [check("postId").not().isEmpty().withMessage("postId is required")],
   validate,
   PostController.comment,
 );
