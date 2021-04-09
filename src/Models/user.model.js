@@ -12,12 +12,12 @@ const userSchema = new Schema({
   admin: Boolean,
   email: { type: String, unique: true, index: true, required: true },
   alias: { type: String, unique: true, required: true },
-  short_bio: String,
-  followed_topics: [],
-  banned_until: Date,
-  restricted_until: Date,
-  profile_image: String,
-  engagement_score: Number,
+  shortBio: String,
+  followedTopics: [],
+  bannedUntil: Date,
+  restrictedUntil: Date,
+  profileImage: String,
+  engagementScore: Number,
 });
 
 // Bearer Token
@@ -46,7 +46,6 @@ userSchema.methods.generateVerificationToken = function generateVerificationToke
     token += characters[Math.floor(Math.random() * characters.length)];
   }
 
-  console.log("userId", this._id, this, token);
   const payload = {
     userId: this._id,
     token,

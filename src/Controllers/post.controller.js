@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Post = require("Models/post.model");
 const Report = require("Models/report.model");
 
@@ -61,4 +62,45 @@ exports.report = async function report(req, res) {
   await Post.updateOne({ _id: postId }, { visibility: false }, { runValidators: true });
 
   return res.status(200).json(newReport);
+};
+
+exports.comment = async function comment(req, res) {
+  const { postId, commentId, message, isPublic } = req.body;
+
+  const post = await Post.findOne({ _id: postId });
+  if (!post) {
+    return res.status(404).json("Post doesn't exist");
+  }
+
+  if (isPublic && !req.user.name) {
+    return res.status(400).json("User name doesn't exist");
+  }
+
+  const newComment = {
+    _id: mongoose.Types.ObjectId(),
+    parentId: commentId || postId,
+    user: {
+      id: req.user._id,
+      alias: isPublic ? req.user.name : req.user.alias,
+      short_bio: isPublic ? req.user.short_bio : undefined,
+    },
+    message,
+    comments: [],
+  };
+
+  if (commentId) {
+    // Recursive comment finder
+    const parentComment = await post.findAndUpdateParentComment(commentId, newComment);
+    console.log("parentComment", parentComment);
+    await Post.updateOne({ _id: postId }, { $set: { comments: parentComment } });
+  } else {
+    if (post.comments === undefined) {
+      post.comments = [];
+    }
+    console.log("old post comments", post.comments);
+    post.comments.push(newComment);
+    console.log("post.comments", post.comments);
+    await Post.updateOne({ _id: postId }, { $set: { comments: post.comments } });
+  }
+  return res.status(200).json("Comment posted!");
 };
