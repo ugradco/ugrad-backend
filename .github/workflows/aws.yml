@@ -17,6 +17,10 @@ jobs:
 
       - name: Generate deployment package
         run: zip -r deploy.zip . -x '*.git*'
+        
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
 
       - name: Deploy to EB
         uses: einaregilsson/beanstalk-deploy@v16
@@ -25,6 +29,6 @@ jobs:
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           application_name: ugrad-backend
           environment_name: Ugradbackend-env
-          version_label: github-build-${{ (date +%s) }}-${{ github.head_ref }}
+          version_label: github-build-${{ steps.date.outputs.date }}-${{ github.base_ref }}
           region: eu-central-1
           deployment_package: deploy.zip
