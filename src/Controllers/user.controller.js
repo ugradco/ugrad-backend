@@ -13,7 +13,7 @@ exports.me = async (req, res) => {
     const user = await User.findOne({ email: req.user.email });
     console.log(user);
 
-    return res.status(200).json(_.pick(req.user, ["_id", "email", "alias", "short_bio", "profile_image"]));
+    return res.status(200).json(_.pick(req.user, ["_id", "email", "name", "alias", "shortBio", "profileImage"]));
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
