@@ -11,7 +11,7 @@ const postSchema = new Schema(
       alias: String,
       short_bio: String,
     },
-    feedback: [], // TODO: decide how to store this
+    upvoteCount: { type: Number, default: 0 },
     comments: [
       {
         user: {
@@ -23,7 +23,12 @@ const postSchema = new Schema(
         comments: Array,
       },
     ],
-    tags: [],
+    tags: [
+      {
+        type: String,
+        index: true,
+      },
+    ],
     images: [String],
     keywords: [String],
   },
