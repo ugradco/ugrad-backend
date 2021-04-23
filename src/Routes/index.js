@@ -2,6 +2,7 @@ const authenticate = require("Middlewares/auth.middleware");
 const auth = require("./auth.route");
 const users = require("./users.route");
 const posts = require("./posts.route");
+const tags = require("./tags.route");
 
 module.exports = (app) => {
   app.get("/", (req, res) => {
@@ -13,4 +14,5 @@ module.exports = (app) => {
   app.use("/auth", auth);
   app.use("/users", authenticate, users);
   app.use("/posts", authenticate, posts);
+  app.use("/tags", authenticate, tags);
 };

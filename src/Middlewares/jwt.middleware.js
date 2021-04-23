@@ -1,5 +1,4 @@
-const JwtStrategy = require("passport-jwt").Strategy;
-const ExtractJwt = require("passport-jwt").ExtractJwt;
+const { Strategy: JwtStrategy, ExtractJwt } = require("passport-jwt");
 
 const User = require("Models/user.model");
 
@@ -10,15 +9,13 @@ const opts = {
 
 module.exports = (passport) => {
   passport.use(
-    new JwtStrategy(opts, (jwt_payload, done) => {
-      User.findById(jwt_payload.id)
+    new JwtStrategy(opts, (jwtPayload, done) => {
+      User.findById(jwtPayload.id)
         .then((user) => {
           if (user) return done(null, user);
           return done(null, false);
         })
-        .catch((err) => {
-          return done(err, false, { message: "Server Error" });
-        });
-    })
+        .catch((err) => done(err, false, { message: "Server Error" }));
+    }),
   );
 };
