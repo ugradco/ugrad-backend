@@ -24,4 +24,6 @@ const tokenSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+tokenSchema.index({ postId: 1, userId: 1 }, { unique: true });
+
 module.exports = mongoose.model("Reports", tokenSchema);
