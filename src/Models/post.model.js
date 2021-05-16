@@ -84,9 +84,7 @@ postSchema.methods.findAndUpdateUserComments = function findAndUpdateComments(us
 
     if (visiting.comments) {
       for (let j = 0; j < visiting.comments.length; j += 1) {
-        console.log("visiting.comments[j].user.id", visiting.comments[j].user.id, user.id);
         if (visiting.comments[j].user.id && visiting.comments[j].user.id.toString() === user.id.toString()) {
-          console.log("Match");
           visiting.comments[j].user = user;
         }
         queue.push(visiting.comments[j]);

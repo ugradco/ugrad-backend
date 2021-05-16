@@ -13,10 +13,7 @@ const { POST_INTERACTION } = require("Constants/global.constants");
  */
 exports.me = async (req, res) => {
   try {
-    console.log(req.user);
-
     const user = await User.findOne({ email: req.user.email });
-    console.log(user);
 
     return res.status(200).json(_.pick(req.user, ["_id", "email", "name", "alias", "shortBio", "profileImage"]));
   } catch (error) {
@@ -150,6 +147,9 @@ exports.update = async (req, res) => {
       // profileImage: user.profileImage,
     };
 
+    // ToDo:
+    // Add update limit
+
     // Update all posts
     let commentedPosts = [];
     await Promise.all(
@@ -170,33 +170,19 @@ exports.update = async (req, res) => {
           Post.findById(interaction.postId).select({
             user: { id: 1 },
             comments: 1,
-            // comments: [{ user: 1, comments: 1, message: 1 }],
           }),
         );
         return null;
       }),
     );
 
-    // TODO USE THIS
-    // .exec(function(err, docs) { ... });
-
     commentedPosts = await Promise.all(commentedPosts);
-    console.log("commentedPosts", commentedPosts);
+
     await Promise.all(
       commentedPosts.map((post) => {
         if (!post) return;
 
-        console.log("post.comments,", post.comments);
-        console.log("post.comments,", post);
         const newComments = post.findAndUpdateUserComments(updatedUserInfo);
-
-        console.log(
-          "newComments",
-          newComments,
-          post.user.id.toString() === updatedUserInfo.id.toString(),
-          post.user.id,
-          updatedUserInfo.id,
-        );
 
         const postUpdates = {
           comments: newComments,
@@ -205,8 +191,6 @@ exports.update = async (req, res) => {
         if (post.user.id.toString() === updatedUserInfo.id.toString()) {
           postUpdates.user = updatedUserInfo;
         }
-
-        return;
 
         return Post.updateOne(
           { _id: post._id },
@@ -219,8 +203,6 @@ exports.update = async (req, res) => {
 
     // if there is no image, return success message
     if (!req.file) return res.status(200).json({ user, message: "User has been updated" });
-
-    // const user_ = await User.findByIdAndUpdate(id, { $set: update }, { new: true });
 
     return res.status(200).json({ user, message: "User has been updated" });
   } catch (error) {
