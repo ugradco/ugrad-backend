@@ -42,6 +42,8 @@ const postSchema = new Schema(
   },
 );
 
+postSchema.index({ text: "text" });
+
 postSchema.methods.findAndUpdateParentComment = function findAndUpdateParentComment(commentId, newComment) {
   const queue = [this];
 

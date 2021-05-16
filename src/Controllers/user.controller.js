@@ -34,8 +34,8 @@ exports.index = async (req, res) => {
   res.status(200).json({ users });
 };
 
+// For testing purposes
 exports.create = async (req, res) => {
-  // TODO: take this into user using create func
   const { email, name } = req.body;
 
   const user = new User({ email, name });
@@ -152,7 +152,6 @@ exports.update = async (req, res) => {
 
     // Update all posts
     let commentedPosts = [];
-    // TODO await not needed immidiately
     await Promise.all(
       postInteractions.map((interaction) => {
         if (interaction.type === POST_INTERACTION.POST) {
@@ -178,6 +177,9 @@ exports.update = async (req, res) => {
       }),
     );
 
+    // TODO USE THIS
+    // .exec(function(err, docs) { ... });
+
     commentedPosts = await Promise.all(commentedPosts);
     console.log("commentedPosts", commentedPosts);
     await Promise.all(
@@ -196,28 +198,20 @@ exports.update = async (req, res) => {
           updatedUserInfo.id,
         );
 
-        return;
+        const postUpdates = {
+          comments: newComments,
+        };
 
         if (post.user.id.toString() === updatedUserInfo.id.toString()) {
-          // Also update post owner
-          console.log("update user too");
-          return Post.updateOne(
-            { _id: post._id },
-            {
-              $set: {
-                comments: newComments,
-                user: updatedUserInfo,
-              },
-            },
-          );
+          postUpdates.user = updatedUserInfo;
         }
+
+        return;
 
         return Post.updateOne(
           { _id: post._id },
           {
-            $set: {
-              comments: newComments,
-            },
+            $set: postUpdates,
           },
         );
       }),

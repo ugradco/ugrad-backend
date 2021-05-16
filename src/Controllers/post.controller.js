@@ -10,25 +10,25 @@ const POSTS_PER_PAGE = 20;
 const REPORT_LIMIT = 3;
 
 exports.feed = async function feed(req, res) {
-  const { page } = req.body;
-  const { tags = [] } = req.query;
+  const { tags = [], search = "", page } = req.query;
 
   // TODO: improve pagination by using post id's as limit
   // iow: find posts after certain postId's
   let posts = [];
+
+  const queryOptions = { visibility: true };
   if (tags.length > 0) {
-    posts = await Post.find({ tags: { $all: tags }, visibility: true })
-      .lean()
-      .sort({ $natural: -1 })
-      .skip((page || 0) * POSTS_PER_PAGE)
-      .limit(POSTS_PER_PAGE);
-  } else {
-    posts = await Post.find({ visibility: true })
-      .lean()
-      .sort({ $natural: -1 })
-      .skip((page || 0) * POSTS_PER_PAGE)
-      .limit(POSTS_PER_PAGE);
+    queryOptions.tags = { $all: tags };
   }
+  if (search) {
+    queryOptions.$text = { $search: search };
+  }
+
+  posts = await Post.find(queryOptions, null)
+    .lean()
+    .sort({ updated_at: -1 })
+    .skip((page || 0) * POSTS_PER_PAGE)
+    .limit(POSTS_PER_PAGE);
 
   const upvoteResults = await Promise.all(
     posts.map((post) => Upvote.findOne({ postId: post._id, userId: req.user._id })),
