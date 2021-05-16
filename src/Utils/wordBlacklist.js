@@ -1,4 +1,4 @@
-[
+exports.wordBlacklist = [
   "abaza",
   "abazan",
   "a\u011fz\u0131na s\u0131\u00e7ay\u0131m",
@@ -626,5 +626,5 @@
   "ziksiiin",
   "ziksiin",
   "zulliyetini",
-  "zviyetini"
-]
+  "zviyetini",
+];

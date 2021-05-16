@@ -6,7 +6,8 @@ const Tag = require("Models/tag.model");
 const Upvote = require("Models/upvote.model");
 const Report = require("Models/report.model");
 const { POST_INTERACTION } = require("Constants/global.constants");
-const wordBlacklist = require("Utils/wordBlacklist.json");
+
+const { wordBlacklist } = require("Utils/wordBlacklist");
 
 const POSTS_PER_PAGE = 20;
 const REPORT_LIMIT = 3;
