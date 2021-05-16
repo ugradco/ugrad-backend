@@ -1,13 +1,18 @@
 const mongoose = require("mongoose");
+const Filter = require("bad-words");
 const Post = require("Models/post.model");
 const PostInteraction = require("Models/postInteraction.model");
 const Tag = require("Models/tag.model");
 const Upvote = require("Models/upvote.model");
 const Report = require("Models/report.model");
 const { POST_INTERACTION } = require("Constants/global.constants");
+const wordBlacklist = require("Utils/wordBlacklist.json");
 
 const POSTS_PER_PAGE = 20;
 const REPORT_LIMIT = 3;
+
+const BadWordFilter = new Filter();
+BadWordFilter.addWords(...wordBlacklist);
 
 exports.feed = async function feed(req, res) {
   const { tags = [], search = "", page } = req.query;
@@ -101,6 +106,10 @@ exports.create = async function create(req, res) {
       return res.status(400).json({ message: "User name is required for public posts" });
     }
 
+    if (BadWordFilter.isProfane(text)) {
+      return res.status(400).json({ message: "Watch your language and post it again :)" });
+    }
+
     // Check tags
     const tagResults = await Promise.all(tags.map((tag) => Tag.findOne({ name: tag })));
 
@@ -146,7 +155,7 @@ exports.delete = async function deletePost(req, res) {
     return res.status(200).json({ message: "Post has been deleted" });
   }
   // user delete = soft delete
-  return res.status(400).json({ message: "Not authorized" });
+  return res.status(401).json({ message: "Not authorized" });
 };
 
 exports.report = async function report(req, res) {
