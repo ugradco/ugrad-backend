@@ -4,12 +4,6 @@ const upvoteSchema = new mongoose.Schema(
   {
     postId: { type: mongoose.ObjectId, required: true },
     userId: { type: mongoose.ObjectId, required: true },
-    createdAt: {
-      type: Date,
-      required: true,
-      default: Date.now,
-      expires: 43200,
-    },
   },
   { timestamps: true },
 );

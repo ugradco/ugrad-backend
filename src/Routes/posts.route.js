@@ -5,7 +5,6 @@ const validate = require("Middlewares/validate.middleware");
 const router = express.Router();
 const PostController = require("Controllers/post.controller");
 
-// TODO: split posts to send them in batches
 router.post(
   "/",
   [

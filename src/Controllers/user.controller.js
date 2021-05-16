@@ -1,17 +1,19 @@
 const _ = require("lodash");
 
 const User = require("Models/user.model");
+const Post = require("Models/post.model");
+const PostInteraction = require("Models/postInteraction.model");
+const { POST_INTERACTION } = require("Constants/global.constants");
 // const {  sendEmail } = require("../utils/index");
 
-// @route GET api/user/me
-// @desc Returns a specific user
-// @access Public
+/**
+ * @route GET api/user/me
+ * @desc Returns a specific user
+ * @access Public
+ */
 exports.me = async (req, res) => {
   try {
-    console.log(req.user);
-
     const user = await User.findOne({ email: req.user.email });
-    console.log(user);
 
     return res.status(200).json(_.pick(req.user, ["_id", "email", "name", "alias", "shortBio", "profileImage"]));
   } catch (error) {
@@ -19,16 +21,18 @@ exports.me = async (req, res) => {
   }
 };
 
-// @route GET admin/user
-// @desc Returns all users
-// @access Public
+/**
+ * @route GET admin/user
+ * @desc Returns all users
+ * @access Public
+ */
 exports.index = async (req, res) => {
   const users = await User.find({});
   res.status(200).json({ users });
 };
 
+// For testing purposes
 exports.create = async (req, res) => {
-  // TODO: take this into user using create func
   const { email, name } = req.body;
 
   const user = new User({ email, name });
@@ -43,9 +47,11 @@ exports.create = async (req, res) => {
   res.status(200).send("Hey success");
 };
 
-// @route POST api/user
-// @desc Add a new user
-// @access Public
+/**
+ * @route POST api/user
+ * @desc Add a new user
+ * @access Public
+ */
 exports.store = async (req, res) => {
   try {
     const { email } = req.body;
@@ -88,9 +94,11 @@ exports.store = async (req, res) => {
   }
 };
 
-// @route GET api/user/{id}
-// @desc Returns a specific user
-// @access Public
+/**
+ * @route GET api/user/{id}
+ * @desc Returns a specific user
+ * @access Public
+ */
 exports.show = async (req, res) => {
   try {
     const { id } = req.params;
@@ -105,15 +113,16 @@ exports.show = async (req, res) => {
   }
 };
 
-// @route PUT api/user/{id}
-// @desc Update user details
-// @access Public
+/**
+ * @route PUT api/user/{id}
+ * @desc Update user details
+ * @access Public
+ */
 exports.update = async (req, res) => {
   try {
     const { id } = req.params;
     const update = req.body;
     const userId = req.user._id;
-    console.log("id", id, userId);
 
     // Make sure the passed id is that of the logged in user
     if ((userId.toString() !== id.toString() && !req.user.admin) || (update.admin && !req.user.admin)) {
@@ -122,23 +131,89 @@ exports.update = async (req, res) => {
       });
     }
 
-    // ToDo check body
+    // Remove unsupported update fields
+    Object.keys(update)
+      .filter((key) => !["name", "shortBio", "profileImage", "admin"].includes(key))
+      .forEach((key) => delete update[key]);
+
     const user = await User.findByIdAndUpdate(id, { $set: update }, { new: true });
+
+    const postInteractions = await PostInteraction.find({ userId: id }).lean();
+
+    const updatedUserInfo = {
+      id: user._id,
+      alias: user.name,
+      shortBio: user.shortBio,
+      // profileImage: user.profileImage,
+    };
+
+    // ToDo:
+    // Add update limit
+
+    // Update all posts
+    let commentedPosts = [];
+    await Promise.all(
+      postInteractions.map((interaction) => {
+        if (interaction.type === POST_INTERACTION.POST) {
+          return Post.updateOne(
+            { _id: interaction.postId },
+            {
+              $set: {
+                updated: "true",
+                user: updatedUserInfo,
+              },
+            },
+          );
+        }
+
+        commentedPosts.push(
+          Post.findById(interaction.postId).select({
+            user: { id: 1 },
+            comments: 1,
+          }),
+        );
+        return null;
+      }),
+    );
+
+    commentedPosts = await Promise.all(commentedPosts);
+
+    await Promise.all(
+      commentedPosts.map((post) => {
+        if (!post) return;
+
+        const newComments = post.findAndUpdateUserComments(updatedUserInfo);
+
+        const postUpdates = {
+          comments: newComments,
+        };
+
+        if (post.user.id.toString() === updatedUserInfo.id.toString()) {
+          postUpdates.user = updatedUserInfo;
+        }
+
+        return Post.updateOne(
+          { _id: post._id },
+          {
+            $set: postUpdates,
+          },
+        );
+      }),
+    );
 
     // if there is no image, return success message
     if (!req.file) return res.status(200).json({ user, message: "User has been updated" });
-
-    // const user_ = await User.findByIdAndUpdate(id, { $set: update }, { new: true });
 
     return res.status(200).json({ user, message: "User has been updated" });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
 };
-
-// @route DESTROY api/user/{id}
-// @desc Delete User
-// @access Public
+/**
+ * @route DESTROY api/user/{id}
+ * @desc Delete User
+ * @access Public
+ */
 exports.destroy = async (req, res) => {
   try {
     const { id } = req.params;
