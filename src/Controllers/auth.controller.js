@@ -20,7 +20,7 @@ exports.register = async (req, res) => {
     // alias: Anonymous#23
     // TODO: Check body injection
     const userCount = await User.count();
-    console.log("userCount", userCount);
+
     const alias = `Anonymous#${12345 + userCount}`;
     const newUser = new User({ email, alias });
 
@@ -43,10 +43,7 @@ exports.login = async (req, res) => {
 
     if (!user) {
       return res.status(401).json({
-        msg:
-          "The email address " +
-          email +
-          " is not associated with any account. Double-check your email address and try again.",
+        msg: `The email address ${email} is not associated with any account. Double-check your email address and try again.`,
       });
     }
 
@@ -98,10 +95,11 @@ exports.verify = async (req, res) => {
     // Find a matching token
     const token = await Token.findOne({ token: req.params.token });
 
-    if (!token)
+    if (!token) {
       return res.status(400).json({
         message: "We were unable to find a valid token. Your token my have expired.",
       });
+    }
 
     // If we found a token, find a matching user
     User.findOne({ _id: token.userId }, (err, user) => {
@@ -154,19 +152,14 @@ exports.resendToken = async (req, res) => {
 
 async function sendVerificationEmail(user, req, res) {
   try {
-    console.log("sendVerificationEmail", user);
-
     // Check if the user has unexpired token
     let token = await Token.findOne({ userId: user._id });
 
     if (!token) {
       token = user.generateVerificationToken();
       // Save the verification token
-      console.log("token:", token);
       await token.save();
     }
-
-    console.log("token saved");
 
     const subject = "Ugrad Verification Code: " + token.token;
     const to = user.email;
@@ -176,7 +169,6 @@ async function sendVerificationEmail(user, req, res) {
                   ${token.token}</p> 
                   <br><p>If you did not request this, please ignore this email.</p>`;
 
-    console.log("send email");
     sendEmail({ to, subject, html });
 
     res.status(200).send({

@@ -159,10 +159,10 @@ exports.update = async (req, res) => {
             { _id: interaction.postId },
             {
               $set: {
-                updated: "true",
                 user: updatedUserInfo,
               },
             },
+            { timestamps: false },
           );
         }
 
@@ -197,6 +197,7 @@ exports.update = async (req, res) => {
           {
             $set: postUpdates,
           },
+          { timestamps: false },
         );
       }),
     );

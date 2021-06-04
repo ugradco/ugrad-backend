@@ -123,8 +123,8 @@ exports.create = async function create(req, res) {
       images,
       tags,
       user: {
-        id: req.user._id,
-        alias: isPublic ? req.user.name : req.user.alias,
+        id: isPublic ? req.user._id : undefined,
+        alias: isPublic ? req.user.name : req.user.getAlias(),
         shortBio: isPublic ? req.user.shortBio : undefined,
         profileImage: isPublic ? req.user.profileImage : undefined,
       },
@@ -133,13 +133,15 @@ exports.create = async function create(req, res) {
     const post = await newPost.save();
 
     // Create an POST interaction
-    const newPostInteraction = new PostInteraction({
-      postId: post._id,
-      userId: req.user._id,
-      type: POST_INTERACTION.POST,
-    });
+    if (isPublic) {
+      const newPostInteraction = new PostInteraction({
+        postId: post._id,
+        userId: req.user._id,
+        type: POST_INTERACTION.POST,
+      });
 
-    await newPostInteraction.save();
+      await newPostInteraction.save();
+    }
 
     return res.status(200).json({ post, message: "A post has been published." });
   } catch (error) {
@@ -211,8 +213,8 @@ exports.comment = async function comment(req, res) {
     _id: mongoose.Types.ObjectId(),
     parentId: commentId || postId,
     user: {
-      id: req.user._id,
-      alias: isPublic ? req.user.name : req.user.alias,
+      id: isPublic ? req.user._id : undefined,
+      alias: isPublic ? req.user.name : req.user.getAlias(),
       shortBio: isPublic ? req.user.shortBio : undefined,
       profileImage: isPublic ? req.user.profileImage : undefined,
     },
@@ -220,25 +222,28 @@ exports.comment = async function comment(req, res) {
     comments: [],
   };
 
-  // Check previous interaction
-  const previousInteraction = await PostInteraction.findOne({ postId, userId: req.user._id });
+  // Create or update interaction if comment is public
+  if (isPublic) {
+    // Check previous interaction
+    const previousInteraction = await PostInteraction.findOne({ postId, userId: req.user._id });
 
-  if (previousInteraction) {
-    if (previousInteraction.type === POST_INTERACTION.POST) {
-      await PostInteraction.updateOne(
-        { postId, userId: req.user._id },
-        { $set: { type: POST_INTERACTION.POST_AND_COMMENT } },
-      );
+    if (previousInteraction) {
+      if (previousInteraction.type === POST_INTERACTION.POST) {
+        await PostInteraction.updateOne(
+          { postId, userId: req.user._id },
+          { $set: { type: POST_INTERACTION.POST_AND_COMMENT } },
+        );
+      }
+    } else {
+      // Create an COMMENT interaction
+      const newPostInteraction = new PostInteraction({
+        postId,
+        userId: req.user._id,
+        type: POST_INTERACTION.COMMENT,
+      });
+
+      await newPostInteraction.save();
     }
-  } else {
-    // Create an COMMENT interaction
-    const newPostInteraction = new PostInteraction({
-      postId,
-      userId: req.user._id,
-      type: POST_INTERACTION.COMMENT,
-    });
-
-    await newPostInteraction.save();
   }
 
   if (commentId) {
