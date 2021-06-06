@@ -1,6 +1,6 @@
 const User = require("Models/user.model");
 const Token = require("Models/token.model");
-const { sendEmail } = require("Utils/index");
+const { sendVerificationTokenEmail } = require("Utils/index");
 
 // @route POST api/user/register
 // @desc Register user
@@ -9,6 +9,11 @@ exports.register = async (req, res) => {
   res.header("Access-Control-Allow-Origin", "*");
   try {
     const { email } = req.body;
+
+    // Only allow koc emails
+    if (!email.includes("@ku.edu.tr")) {
+      return res.status(400).json({ success: false, message: "You can only login with Koc University email accounts" });
+    }
 
     // Make sure this account doesn't already exist
     const user = await User.findOne({ email });
@@ -161,15 +166,7 @@ async function sendVerificationEmail(user, req, res) {
       await token.save();
     }
 
-    const subject = "Ugrad Verification Code: " + token.token;
-    const to = user.email;
-    const link = "http://" + req.headers.host + "/api/auth/verify/" + token.token;
-    const html = `<p>Hi ${user.username || "Stranger"}<p><br>
-                  <p>Please use following code to verify your account: 
-                  ${token.token}</p> 
-                  <br><p>If you did not request this, please ignore this email.</p>`;
-
-    sendEmail({ to, subject, html });
+    sendVerificationTokenEmail(user, token.token);
 
     res.status(200).send({
       message: "A verification email has been sent to " + user.email + ".",
