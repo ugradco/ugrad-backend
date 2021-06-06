@@ -1,4 +1,17 @@
 const nodemailer = require("nodemailer");
+const handlebars = require("handlebars");
+const fs = require("fs");
+
+const readHTMLFile = function (path, callback) {
+  fs.readFile(path, { encoding: "utf-8" }, function (err, html) {
+    if (err) {
+      throw err;
+      callback(err);
+    } else {
+      callback(null, html);
+    }
+  });
+};
 
 const user = process.env.AWS_SMTP_USER;
 const pass = process.env.AWS_SMTP_USER_PASS;
@@ -16,7 +29,32 @@ const transport = nodemailer.createTransport({
 });
 
 function sendEmail(mailOptions) {
-  return transport.sendMail({ from: defaultEmail, ...mailOptions }).catch((err) => console.log(err));
+  return transport.sendMail({ from: `UGrad <${defaultEmail}>`, ...mailOptions }).catch((err) => console.log(err));
 }
 
-module.exports = { sendEmail };
+function sendVerificationTokenEmail(user, token) {
+  readHTMLFile(__dirname + "/emails/verification.html", function (err, html) {
+    const template = handlebars.compile(html);
+    const replacements = {
+      token,
+    };
+    const htmlToSend = template(replacements);
+
+    const subject = "UGrad Verification Code: " + token;
+    const to = user.email;
+    // const link = "http://" + req.headers.host + "/api/auth/verify/" + token.token;
+
+    const mailOptions = {
+      from: `UGrad <${defaultEmail}>`,
+      to,
+      subject,
+      html: htmlToSend,
+    };
+
+    transport.sendMail(mailOptions).catch((err) => console.log(err));
+  });
+
+  return;
+}
+
+module.exports = { sendEmail, sendVerificationTokenEmail };
