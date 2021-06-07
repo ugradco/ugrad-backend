@@ -1,6 +1,7 @@
 const nodemailer = require("nodemailer");
 const handlebars = require("handlebars");
 const fs = require("fs");
+const path = require("path");
 
 const readHTMLFile = function (path, callback) {
   fs.readFile(path, { encoding: "utf-8" }, function (err, html) {
@@ -33,7 +34,7 @@ function sendEmail(mailOptions) {
 }
 
 async function sendVerificationTokenEmail(user, token) {
-  readHTMLFile(__dirname + "/emails/verification.html", function (err, html) {
+  readHTMLFile(path.join(__dirname, "/../Assets/emails/verification.html"), function (err, html) {
     const template = handlebars.compile(html);
     const replacements = {
       token,

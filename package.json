@@ -2,11 +2,15 @@
   "name": "ugrad-backend",
   "version": "1.0.0",
   "main": "index.js",
+  "files": [
+    "Public/*"
+  ],
   "scripts": {
     "start": "npm run build && node ./build/index.js",
     "dev": "nodemon --exec babel-node src/index.js",
-    "build": "npm run clean && npm run build-babel",
+    "build": "npm run clean && npm run build-babel && npm run rsync",
     "build-babel": "babel -d ./build ./src -s",
+    "rsync": "rsync -r --include '*' --prune-empty-dirs 'src/Assets' 'build/'",
     "clean": "rm -rf build && mkdir build"
   },
   "dependencies": {

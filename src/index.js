@@ -3,12 +3,15 @@ const passport = require("passport");
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const path = require("path");
 
 // Setting up port
 const mongoConnUri = process.env.MONGO_CONN_URL;
 const PORT = process.env.PORT || 3000;
 
 const app = express();
+
+app.use(express.static(path.join(__dirname, "Public")));
 
 app.use(cors());
 app.use(express.json());
