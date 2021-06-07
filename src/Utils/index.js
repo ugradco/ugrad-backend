@@ -32,7 +32,7 @@ function sendEmail(mailOptions) {
   return transport.sendMail({ from: `UGrad <${defaultEmail}>`, ...mailOptions }).catch((err) => console.log(err));
 }
 
-function sendVerificationTokenEmail(user, token) {
+async function sendVerificationTokenEmail(user, token) {
   readHTMLFile(__dirname + "/emails/verification.html", function (err, html) {
     const template = handlebars.compile(html);
     const replacements = {

@@ -16,7 +16,7 @@ const BadWordFilter = new Filter();
 BadWordFilter.addWords(...wordBlacklist);
 
 exports.feed = async function feed(req, res) {
-  const { tags = [], search = "", page } = req.query;
+  const { tags = [], search = "", page = 0 } = req.query;
 
   // TODO: improve pagination by using post id's as limit
   // iow: find posts after certain postId's
@@ -30,20 +30,22 @@ exports.feed = async function feed(req, res) {
     queryOptions.$text = { $search: search };
   }
 
+  const postCount = await Post.count(queryOptions, null);
+
   posts = await Post.find(queryOptions, null)
     .lean()
     .sort({ updated_at: -1 })
-    .skip((page || 0) * POSTS_PER_PAGE)
+    .skip(page * POSTS_PER_PAGE)
     .limit(POSTS_PER_PAGE);
 
-  const upvoteResults = await Promise.all(
+  const upVoteResults = await Promise.all(
     posts.map((post) => Upvote.findOne({ postId: post._id, userId: req.user._id })),
   );
 
   const personalizedPosts = posts.map((post, index) => {
     const newPost = { ...post };
 
-    if (upvoteResults[index]) {
+    if (upVoteResults[index]) {
       newPost.upvoted = true;
     } else {
       newPost.upvoted = false;
@@ -52,7 +54,10 @@ exports.feed = async function feed(req, res) {
     return newPost;
   });
 
-  return res.status(200).json({ posts: personalizedPosts });
+  const pageCount = Math.ceil(postCount / POSTS_PER_PAGE);
+  const hasMore = pageCount > page + 1;
+
+  return res.status(200).json({ posts: personalizedPosts, pageCount, hasMore, postsPerPage: POSTS_PER_PAGE });
 };
 
 exports.upvote = async function upvote(req, res) {
