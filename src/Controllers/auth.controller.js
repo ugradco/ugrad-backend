@@ -15,8 +15,10 @@ exports.register = async (req, res) => {
       return res.status(400).json({ success: false, message: "You can only login with Koc University email accounts" });
     }
 
+    const normalizedEmail = email.toLowerCase();
+
     // Make sure this account doesn't already exist
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ normalizedEmail });
 
     if (user) {
       return sendVerificationEmail(user, req, res);
@@ -27,7 +29,7 @@ exports.register = async (req, res) => {
     const userCount = await User.count();
 
     const alias = `Anonymous#${12345 + userCount}`;
-    const newUser = new User({ email, alias });
+    const newUser = new User({ normalizedEmail, alias });
 
     const user_ = await newUser.save();
 
@@ -44,7 +46,9 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    const normalizedEmail = email.toLowerCase();
+
+    const user = await User.findOne({ normalizedEmail });
 
     if (!user) {
       return res.status(401).json({

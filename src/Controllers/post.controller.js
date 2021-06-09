@@ -205,7 +205,11 @@ exports.report = async function report(req, res) {
 exports.comment = async function comment(req, res) {
   const { postId, commentId, message, isPublic } = req.body;
 
-  const post = await Post.findOne({ _id: postId });
+  const post = await Post.findById(postId).select({
+    user: { id: 1 },
+    comments: 1,
+  });
+
   if (!post) {
     return res.status(404).json("Post doesn't exist");
   }

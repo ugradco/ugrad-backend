@@ -10,7 +10,7 @@ const userSchema = new Schema({
   id: Number,
   name: String,
   admin: Boolean,
-  email: { type: String, unique: true, index: true, required: true },
+  email: { type: String, unique: true, index: true, required: true, lowercase: true },
   alias: { type: String, unique: true, required: true },
   shortBio: String,
   followedTopics: [],

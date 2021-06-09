@@ -13,9 +13,9 @@ const { POST_INTERACTION } = require("Constants/global.constants");
  */
 exports.me = async (req, res) => {
   try {
-    const user = await User.findOne({ email: req.user.email });
+    const user = _.pick(req.user, ["_id", "email", "name", "alias", "shortBio", "profileImage"]);
 
-    return res.status(200).json(_.pick(req.user, ["_id", "email", "name", "alias", "shortBio", "profileImage"]));
+    return res.status(200).json({ ...user, alias: req.user.getAlias() });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -28,7 +28,9 @@ exports.me = async (req, res) => {
  */
 exports.index = async (req, res) => {
   const users = await User.find({});
-  res.status(200).json({ users });
+  const filteredUsers = users.map((user) => _.pick(user, ["_id", "email", "name", "shortBio", "profileImage"]));
+
+  res.status(200).json({ filteredUsers });
 };
 
 // For testing purposes
@@ -188,7 +190,12 @@ exports.update = async (req, res) => {
           comments: newComments,
         };
 
-        if (post.user.id.toString() === updatedUserInfo.id.toString()) {
+        console.log(
+          "newComments",
+          newComments.map((comment) => comment.user),
+        );
+
+        if (post.user.id && post.user.id.toString() === updatedUserInfo.id.toString()) {
           postUpdates.user = updatedUserInfo;
         }
 
