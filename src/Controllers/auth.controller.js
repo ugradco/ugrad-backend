@@ -43,28 +43,13 @@ exports.login = async (req, res) => {
 
     const normalizedEmail = email.toLowerCase();
 
-    const user = await User.findOne({ normalizedEmail });
+    const user = await User.findOne({ email: normalizedEmail });
 
     if (!user) {
       return res.status(401).json({
         msg: `The email address ${email} is not associated with any account. Double-check your email address and try again.`,
       });
     }
-
-    // Validate password
-    // TODO
-    // if (!user.comparePassword(password))
-    //   return res.status(401).json({ message: "Invalid email or password" });
-
-    // Make sure the user has been verified
-    // TODO
-    // if (!user.isVerified)
-    //   return res
-    //     .status(401)
-    //     .json({
-    //       type: "not-verified",
-    //       message: "Your account has not been verified.",
-    //     });
 
     const token = await Token.findOne({ token: req.body.token });
 
