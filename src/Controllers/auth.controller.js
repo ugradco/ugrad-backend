@@ -24,12 +24,7 @@ exports.register = async (req, res) => {
       return sendVerificationEmail(user, req, res);
     }
 
-    // alias: Anonymous#23
-    // TODO: Check body injection
-    const userCount = await User.count();
-
-    const alias = `Anonymous#${12345 + userCount}`;
-    const newUser = new User({ normalizedEmail, alias });
+    const newUser = new User({ normalizedEmail });
 
     const user_ = await newUser.save();
 

@@ -11,7 +11,6 @@ const userSchema = new Schema({
   name: String,
   admin: Boolean,
   email: { type: String, unique: true, index: true, required: true, lowercase: true },
-  alias: { type: String, unique: true, required: true },
   shortBio: String,
   followedTopics: [],
   bannedUntil: Date,

@@ -36,7 +36,7 @@ db.once("open", () => {
   console.log("MongoDB connection success:");
 });
 
-//Bind connection to error event (to get notification of connection errors)
+// Bind connection to error event (to get notification of connection errors)
 db.on("error", () => {
   console.log("MongoDB connection error:");
   process.exit();
