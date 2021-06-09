@@ -18,13 +18,13 @@ exports.register = async (req, res) => {
     const normalizedEmail = email.toLowerCase();
 
     // Make sure this account doesn't already exist
-    const user = await User.findOne({ normalizedEmail });
+    const user = await User.findOne({ email: normalizedEmail });
 
     if (user) {
       return sendVerificationEmail(user, req, res);
     }
 
-    const newUser = new User({ normalizedEmail });
+    const newUser = new User({ email: normalizedEmail });
 
     const user_ = await newUser.save();
 

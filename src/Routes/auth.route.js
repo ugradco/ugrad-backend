@@ -4,8 +4,16 @@ const { check } = require("express-validator");
 const Auth = require("Controllers/auth.controller");
 // const Password = require("Controllers/password");
 const validate = require("Middlewares/validate.middleware");
+const rateLimit = require("express-rate-limit");
 
 const router = express.Router();
+
+const limiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 2, // limit each IP to 100 requests per windowMs
+  skipFailedRequests: true,
+  message: "Too many register requests, please try again later",
+});
 
 router.get("/", (req, res) => {
   res.status(200).json({
@@ -15,21 +23,9 @@ router.get("/", (req, res) => {
 
 router.post(
   "/register",
-  [
-    // TODO ADD ku mail check
-    check("email").isEmail().withMessage("Enter a valid email address"),
-    // check("password")
-    //   .not()
-    //   .isEmpty()
-    //   .isLength({ min: 6 })
-    //   .withMessage("Must be at least 6 chars long"),
-    // check("firstName")
-    //   .not()
-    //   .isEmpty()
-    //   .withMessage("You first name is required"),
-    // check("lastName").not().isEmpty().withMessage("You last name is required"),
-  ],
+  [check("email").isEmail().withMessage("Enter a valid email address")],
   validate,
+  limiter,
   Auth.register,
 );
 
