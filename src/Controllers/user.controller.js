@@ -190,11 +190,6 @@ exports.update = async (req, res) => {
           comments: newComments,
         };
 
-        console.log(
-          "newComments",
-          newComments.map((comment) => comment.user),
-        );
-
         if (post.user.id && post.user.id.toString() === updatedUserInfo.id.toString()) {
           postUpdates.user = updatedUserInfo;
         }
