@@ -17,8 +17,8 @@ const whitelist = ["https://app.ugrad.co", "http://localhost:3000"];
 
 app.use(
   cors({
-    preflightContinue: true,
-    credentials: true,
+    preflightContinue: false,
+    credentials: false,
     origin: (origin, callback) => {
       if (whitelist.indexOf(origin) !== -1) {
         callback(null, true);
