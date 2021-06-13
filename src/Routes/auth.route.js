@@ -10,7 +10,7 @@ const router = express.Router();
 
 const limiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 2, // limit each IP to 100 requests per windowMs
+  max: 2, // limit each IP to 2 requests per windowMs
   skipFailedRequests: true,
   message: "Too many register requests, please try again later",
 });

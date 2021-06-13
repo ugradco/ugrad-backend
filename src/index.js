@@ -13,7 +13,21 @@ const app = express();
 
 app.use(express.static(path.join(__dirname, "Public")));
 
-app.use(cors());
+const whitelist = ["https://app.ugrad.co", "http://localhost:3000"];
+
+app.use(
+  cors({
+    preflightContinue: true,
+    credentials: true,
+    origin: (origin, callback) => {
+      if (whitelist.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+  }),
+);
 app.use(express.json());
 // for parsing application/xwww-
 // TODO: research
