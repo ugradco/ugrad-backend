@@ -17,15 +17,18 @@ const whitelist = ["https://app.ugrad.co", "http://localhost:3000"];
 
 app.use(
   cors({
+    optionsSuccessStatus: 200,
+    origin: "*",
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     preflightContinue: false,
-    credentials: true,
-    origin: (origin, callback) => {
-      if (whitelist.indexOf(origin) !== -1) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    // credentials: true,
+    // origin: (origin, callback) => {
+    //   if (whitelist.indexOf(origin) !== -1) {
+    //     callback(null, true);
+    //   } else {
+    //     callback(new Error("Not allowed by CORS"));
+    //   }
+    // },
   }),
 );
 app.use(express.json());
